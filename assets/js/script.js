@@ -5,9 +5,25 @@ const resultsModal = new bootstrap.Modal(document.getElementById("resultsModal")
 document.getElementById("status").addEventListener("click", e => getStatus(e));
 document.getElementById("submit").addEventListener("click", e => postForm(e));
 
-async function postForm(e) {
+function processOptions(form) {
+    let optArray = [];
 
-    const form = new FormData(document.getElementById("checksform"));
+    for (let e of form.entries()) {
+        if (e[0] === "options") {
+            optArray.push(e[1]);
+        }
+    }
+
+    form.delete("options");
+
+    form.append("options", optArray.join());
+
+    return form;
+}
+
+
+async function postForm(e) {
+    const form = processOptions(new FormData(document.getElementById("checksform")));
 
     const response = await fetch(API_URL, {
         method: "POST",
@@ -58,7 +74,7 @@ function displayErrors(data) {
             results += `<div class="error">${error.error}</div>`;
         }
     }
-    
+
     document.getElementById("resultsModalTitle").innerText = heading;
     document.getElementById("results-content").innerHTML = results;
     resultsModal.show();
